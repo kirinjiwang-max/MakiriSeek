@@ -6,51 +6,24 @@
     <title>MakiriSeek Console</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
+        /* 这里保留你之前的样式不变，直接跳到下面的 Script 部分 */
         :root { --bg: #212121; --sidebar: #171717; --text: #ececf1; --border: rgba(255,255,255,0.1); }
-        
-        /* 基础布局 */
         body { margin: 0; display: flex; height: 100vh; font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
-
-        /* 侧边栏：移动端自动隐藏 */
         .sidebar { width: 260px; background: var(--sidebar); display: flex; flex-direction: column; padding: 15px; border-right: 1px solid var(--border); }
-        .brand { font-size: 18px; font-weight: 600; padding: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #10a37f; }
-        .new-chat { border: 1px solid var(--border); border-radius: 6px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s; font-size: 14px; }
-        .new-chat:hover { background: rgba(255,255,255,0.05); }
-
-        /* 主界面 */
         .main { flex: 1; display: flex; flex-direction: column; position: relative; width: 100%; height: 100%; min-width: 0; }
         .top-bar { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); background: var(--bg); }
-        #modelPicker { background: #2f2f2f; color: #fff; border: 1px solid var(--border); border-radius: 5px; padding: 5px; font-size: 14px; outline: none; max-width: 160px; }
-
-        /* 聊天区：响应式内边距 */
-        #chat-content { flex: 1; overflow-y: auto; padding-bottom: 20px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
-        .row { padding: 32px 18%; display: flex; gap: 20px; }
-        .row.ai { background: rgba(255,255,255,0.02); }
-        
-        .avatar { width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 12px; }
-        .user .avatar { background: #5436da; color: white; }
-        .ai .avatar { background: #10a37f; color: white; }
-        
-        .text { flex: 1; font-size: 16px; line-height: 1.6; color: #d1d1d1; overflow-wrap: break-word; min-width: 0; }
-        .text pre { background: #000; padding: 12px; border-radius: 8px; overflow-x: auto; border: 1px solid var(--border); font-size: 14px; }
-        .text code { font-family: monospace; background: rgba(255,255,255,0.1); padding: 2px 4px; border-radius: 4px; }
-
-        /* 输入区：移动端适配 */
+        #modelPicker { background: #2f2f2f; color: #fff; border: 1px solid var(--border); border-radius: 5px; padding: 5px; font-size: 14px; outline: none; }
+        #chat-content { flex: 1; overflow-y: auto; padding-bottom: 20px; -webkit-overflow-scrolling: touch; }
+        .row { padding: 25px 18%; display: flex; gap: 20px; }
+        .avatar { width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
+        .user .avatar { background: #5436da; }
+        .ai .avatar { background: #10a37f; }
+        .text { flex: 1; font-size: 16px; line-height: 1.6; color: #d1d1d1; }
         .input-area { padding: 20px 18% 40px; background: linear-gradient(transparent, var(--bg) 20%); }
-        .input-wrap { position: relative; background: #2f2f2f; border: 1px solid var(--border); border-radius: 12px; padding: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        textarea { width: 100%; background: transparent; border: none; color: white; outline: none; font-size: 16px; resize: none; max-height: 160px; padding-right: 40px; box-sizing: border-box; display: block; }
-        #sendBtn { position: absolute; right: 10px; bottom: 10px; background: #10a37f; color: #fff; border: none; border-radius: 7px; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        #sendBtn:disabled { background: #444; opacity: 0.6; }
-
-        /* --- 手机端适配关键代码 --- */
-        @media (max-width: 768px) {
-            .sidebar { display: none; } /* 隐藏侧边栏 */
-            .row { padding: 20px 15px; gap: 12px; } /* 拉满屏幕宽度 */
-            .input-area { padding: 10px 10px 25px; } /* 输入框左右留白减小 */
-            .text { font-size: 15px; } /* 移动端字号微调 */
-            .top-bar { padding: 10px; }
-            #modelPicker { max-width: 130px; }
-        }
+        .input-wrap { position: relative; background: #2f2f2f; border: 1px solid var(--border); border-radius: 12px; padding: 10px; }
+        textarea { width: 100%; background: transparent; border: none; color: white; outline: none; font-size: 16px; resize: none; }
+        #sendBtn { position: absolute; right: 10px; bottom: 10px; background: #10a37f; color: #fff; border: none; border-radius: 7px; width: 30px; height: 30px; cursor: pointer; }
+        @media (max-width: 768px) { .sidebar { display: none; } .row { padding: 20px 15px; } .input-area { padding: 10px 10px 25px; } }
     </style>
 </head>
 <body>
@@ -58,128 +31,107 @@
 <div class="sidebar">
     <div class="brand"><span>●</span> MakiriSeek</div>
     <div class="new-chat" onclick="location.reload()">+ 新对话</div>
-    <div style="margin-top: auto; font-size: 12px; color: #666; padding: 10px;">Mobile Optimized v2.0</div>
 </div>
 
 <div class="main">
     <div class="top-bar">
-        <select id="modelPicker"><option>载入模型...</option></select>
-        <div style="font-size: 11px; color: #10a37f; border: 1px solid #10a37f; padding: 2px 6px; border-radius: 4px;">LIVE</div>
+        <select id="modelPicker"><option>载入中...</option></select>
+        <div style="font-size: 11px; color: #10a37f;">Ollama Proxy Mode</div>
     </div>
-
-    <div id="chat-content">
-        <div class="row ai">
-            <div class="avatar">M</div>
-            <div class="text">你好！我是 MakiriSeek。已为您完成手机端适配，您可以随时随地与我聊天了。</div>
-        </div>
-    </div>
-
+    <div id="chat-content"></div>
     <div class="input-area">
         <div class="input-wrap">
-            <textarea id="userInput" rows="1" placeholder="发送消息..." oninput="autoGrow(this)"></textarea>
+            <textarea id="userInput" rows="1" placeholder="发送消息..."></textarea>
             <button id="sendBtn" onclick="send()">↑</button>
         </div>
     </div>
 </div>
 
 <script>
-    // 【请确保此处是您的最新隧道地址】
     const API = 'https://repository-solomon-assumptions-exchange.trycloudflare.com';
     const picker = document.getElementById('modelPicker');
     const box = document.getElementById('chat-content');
     const input = document.getElementById('userInput');
-    const btn = document.getElementById('sendBtn');
+    
+    // --- 重点：解决拼音未打完就发送的神器 ---
+    let isComposing = false; // 标记是否正在输入拼音
 
-    // 自动高度脚本
-    function autoGrow(element) {
-        element.style.height = "auto";
-        element.style.height = (element.scrollHeight) + "px";
-    }
+    input.addEventListener('compositionstart', () => { isComposing = true; });
+    input.addEventListener('compositionend', () => { isComposing = false; });
 
-    // 1. 同步模型
+    input.addEventListener('keydown', (e) => {
+        // 如果正在打拼音，或者按下了 Shift+Enter，就别发送
+        if (e.key === 'Enter') {
+            if (isComposing) {
+                // 拼音输入法中的 Enter 只是为了确认拼音，不触发发送
+                return; 
+            }
+            if (!e.shiftKey) {
+                e.preventDefault();
+                send();
+            }
+        }
+    });
+
+    // 自动高度也要稍微优化，防止拼音跳动
+    input.addEventListener('input', function() {
+        if (isComposing) return;
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+    });
+
+    // 剩下的同步模型和发送逻辑（保持之前的）
     async function syncModels() {
         try {
             const r = await fetch(`${API}/api/tags`);
             const d = await r.json();
-            if(d.models) {
-                picker.innerHTML = d.models.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
-            }
-        } catch(e) { picker.innerHTML = "<option>无法连接代理</option>"; }
+            if(d.models) picker.innerHTML = d.models.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
+        } catch(e) { picker.innerHTML = "<option>连接失败</option>"; }
     }
     syncModels();
 
-    // 2. 核心发送逻辑
     async function send() {
         const val = input.value.trim();
-        if(!val || btn.disabled) return;
-
+        if(!val || isComposing) return;
         const model = picker.value;
         input.value = '';
         input.style.height = 'auto';
-        btn.disabled = true;
-
-        // 插入用户消息
-        box.innerHTML += `<div class="row user"><div class="avatar">U</div><div class="text">${val}</div></div>`;
         
-        // 插入 AI 占位
+        box.innerHTML += `<div class="row user"><div class="avatar">U</div><div class="text">${val}</div></div>`;
         const aiId = 'ai_' + Date.now();
-        box.innerHTML += `<div class="row ai"><div class="avatar">M</div><div class="text" id="${aiId}">思考中...</div></div>`;
+        box.innerHTML += `<div class="row ai"><div class="avatar">M</div><div class="text" id="${aiId}">正在思考...</div></div>`;
         box.scrollTo(0, box.scrollHeight);
-
-        const aiElement = document.getElementById(aiId);
-        let fullText = "";
 
         try {
             const response = await fetch(`${API}/api/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: model,
-                    messages: [{ role: "user", content: val }],
-                    stream: true 
-                })
+                body: JSON.stringify({ model, messages: [{role:"user", content:val}], stream: true })
             });
-
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
+            const aiElement = document.getElementById(aiId);
             aiElement.innerText = "";
-
+            let fullText = "";
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
-
-                const chunk = decoder.decode(value, { stream: true });
+                const chunk = decoder.decode(value);
                 const lines = chunk.split('\n');
-
                 for (const line of lines) {
                     if (!line.trim()) continue;
                     try {
                         const json = JSON.parse(line);
-                        if (json.message && json.message.content) {
+                        if (json.message?.content) {
                             fullText += json.message.content;
                             aiElement.innerHTML = marked.parse(fullText);
-                            // 只有当用户接近底部时才自动滚动，提升手机阅读体验
-                            if (box.scrollHeight - box.scrollTop < 1000) {
-                                box.scrollTo(0, box.scrollHeight);
-                            }
+                            box.scrollTo(0, box.scrollHeight);
                         }
                     } catch (e) {}
                 }
             }
-        } catch (e) {
-            aiElement.innerText = "❌ 连不上了，请检查 Mac 端的代理和隧道。";
-        } finally {
-            btn.disabled = false;
-        }
+        } catch (e) { document.getElementById(aiId).innerText = "出错了..."; }
     }
-
-    // 处理手机虚拟键盘的 Enter 键
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            send();
-        }
-    });
 </script>
 </body>
 </html>

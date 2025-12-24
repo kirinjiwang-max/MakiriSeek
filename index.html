@@ -54,7 +54,7 @@
     <div id="chat-content">
         <div class="row ai">
             <div class="avatar">M</div>
-            <div class="text">你好，Maxi。今天有什么我可以帮你的？</div>
+            <div class="text">你好，我是 MakiriSeek。今天有什么我可以帮你的？</div>
         </div>
     </div>
 
@@ -70,7 +70,8 @@
 </div>
 
 <script>
-    const API = "https://transportation-mpg-casual-enzyme.trycloudflare.com";
+    // 已经更新为最新的 Cloudflare 隧道地址
+    const API = 'https://physically-comparing-cancellation-austin.trycloudflare.com';
     const picker = document.getElementById('modelPicker');
     const box = document.getElementById('chat-content');
     const input = document.getElementById('userInput');
@@ -87,7 +88,7 @@
     }
     syncModels();
 
-    // 2. 核心发送逻辑：流式输出
+    // 2. 核心发送逻辑
     async function send() {
         const val = input.value.trim();
         if(!val) return;
@@ -96,10 +97,8 @@
         input.value = '';
         input.style.height = 'auto';
 
-        // 添加用户消息
         box.innerHTML += `<div class="row user"><div class="avatar">U</div><div class="text">${val}</div></div>`;
 
-        // 创建 AI 占位气泡
         const aiId = 'ai_' + Date.now();
         box.innerHTML += `<div class="row ai"><div class="avatar">M</div><div class="text" id="${aiId}">...</div></div>`;
         box.scrollTo(0, box.scrollHeight);
@@ -108,13 +107,13 @@
         let fullText = "";
 
         try {
-            // 使用 fetch 的流式读取模式
             const response = await fetch(`${API}/api/chat`, {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     model: model,
                     messages: [{ role: "user", content: val }],
-                    stream: true // 开启流式！
+                    stream: true
                 })
             });
 
@@ -126,7 +125,6 @@
                 if (done) break;
 
                 const chunk = decoder.decode(value, { stream: true });
-                // Ollama 返回的是多行 JSON
                 const lines = chunk.split('\n');
 
                 for (const line of lines) {
@@ -135,19 +133,17 @@
                         const json = JSON.parse(line);
                         if (json.message && json.message.content) {
                             fullText += json.message.content;
-                            // 使用 marked 解析 Markdown，实现 ChatGPT 的排版效果
                             aiElement.innerHTML = marked.parse(fullText);
                             box.scrollTo(0, box.scrollHeight);
                         }
-                    } catch (e) { /* 忽略不完整的 JSON 块 */ }
+                    } catch (e) { }
                 }
             }
         } catch (e) {
-            aiElement.innerText = "错误：无法连接到本地代理。请检查隧道是否在线。";
+            aiElement.innerText = "错误：无法连接到本地代理。请确保你的 Mac 终端运行着 maxi_proxy.py 且隧道在线。";
         }
     }
 
-    // 回车发送，Shift+Enter 换行
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -156,4 +152,5 @@
     });
 </script>
 </body>
+</html>
 </html>
